@@ -13,7 +13,7 @@ const PriveteRoute = ({ children, ...rest }: IPriveteRouteProps) => {
   return (
     <Navigate
       to={{
-        pathname: "/login",
+        pathname: "/",
       }}
     />
   );
