@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import logoImage from "../assets/images/lws-logo-light.svg";
 import Error from "../components/ui/Error";
 import { useLoginMutation } from "../features/auth/authAPI";
@@ -10,11 +10,29 @@ export default function Login() {
   const [error, setError] = useState("");
 
   const [login, { data, error: responseError, isError }] = useLoginMutation();
+  const navigate = useNavigate();
+
   const handleSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault();
     setError("");
     login({ email, password });
   };
+
+  useEffect(() => {
+    if (responseError) {
+      if ("status" in responseError) {
+        const errorMessage =
+          "error" in responseError
+            ? responseError.error
+            : JSON.stringify(responseError.data);
+        setError(errorMessage);
+      }
+    }
+    if (data?.accessToken && data?.user) {
+      navigate("/inbox");
+    }
+  }, [data, responseError, navigate]);
+
   return (
     <div className="grid place-items-center h-screen bg-[#F9FAFB">
       <div className="flex items-center justify-center min-h-full px-4 py-12 sm:px-6 lg:px-8">
@@ -96,7 +114,7 @@ export default function Login() {
               </button>
             </div>
 
-            <Error message="There was an error" />
+            {error !== "" && <Error message={error} />}
           </form>
         </div>
       </div>
