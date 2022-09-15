@@ -1,4 +1,3 @@
-import { Key } from "react";
 import { useAppSelector } from "../../app/hooks";
 import { useGetConversationQuery } from "../../features/conversations/conversationApi";
 import Error from "../ui/Error";
@@ -33,11 +32,11 @@ export default function ChatItems() {
           y="0"
           width="100%"
           height="100%"
-          clip-path="url(#clip-path)"
+          clipPath="url(#clipPath)"
           // style='fill: url("#fill");'
         ></rect>
         <defs>
-          <clipPath id="clip-path">
+          <clipPath id="clipPath">
             <rect x="48" y="8" rx="3" ry="3" width="88" height="6" />
             <rect x="48" y="26" rx="3" ry="3" width="52" height="6" />
             <rect x="0" y="56" rx="3" ry="3" width="410" height="6" />
@@ -46,7 +45,7 @@ export default function ChatItems() {
             <circle cx="20" cy="20" r="20" />
           </clipPath>
           <linearGradient id="fill">
-            <stop offset="0.599964" stop-color="#f3f3f3" stop-opacity="1">
+            <stop offset="0.599964" stopColor="#f3f3f3" stopOpacity="1">
               <animate
                 attributeName="offset"
                 values="-2; -2; 1"
@@ -55,7 +54,7 @@ export default function ChatItems() {
                 repeatCount="indefinite"
               ></animate>
             </stop>
-            <stop offset="1.59996" stop-color="#ecebeb" stop-opacity="1">
+            <stop offset="1.59996" stopColor="#ecebeb" stopOpacity="1">
               <animate
                 attributeName="offset"
                 values="-1; -1; 2"
@@ -64,7 +63,7 @@ export default function ChatItems() {
                 repeatCount="indefinite"
               ></animate>
             </stop>
-            <stop offset="2.59996" stop-color="#f3f3f3" stop-opacity="1">
+            <stop offset="2.59996" stopColor="#f3f3f3" stopOpacity="1">
               <animate
                 attributeName="offset"
                 values="0; 0; 3"
