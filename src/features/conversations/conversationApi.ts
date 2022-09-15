@@ -14,12 +14,36 @@ export interface IConversation {
 }
 const conversationApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getConversation: builder.query<IConversation[], string>({
+    getConversations: builder.query<IConversation[], string>({
       query: (email) => ({
         url: `/conversations?participants_like=${email}&_sort=timestamp&_order=desc&_page=1&_limit=${process.env.REACT_APP_CONVERSATION_PER_PAGE}`,
+      }),
+    }),
+    getConversation: builder.query({
+      query: ({ userEmail, participantEmail }) => ({
+        url: `/conversations?participants_like=${userEmail}-${participantEmail}&&participants_like=${participantEmail}-${userEmail}`,
+      }),
+    }),
+    addConversation: builder.mutation({
+      query: (data) => ({
+        url: `/conversations`,
+        method: "POST",
+        body: data,
+      }),
+    }),
+    editConversation: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `/conversations/${id}`,
+        method: "POST",
+        body: data,
       }),
     }),
   }),
 });
 
-export const { useGetConversationQuery } = conversationApi;
+export const {
+  useGetConversationsQuery,
+  useGetConversationQuery,
+  useAddConversationMutation,
+  useEditConversationMutation,
+} = conversationApi;

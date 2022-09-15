@@ -1,5 +1,5 @@
 import { useAppSelector } from "../../app/hooks";
-import { useGetConversationQuery } from "../../features/conversations/conversationApi";
+import { useGetConversationsQuery } from "../../features/conversations/conversationApi";
 import Error from "../ui/Error";
 import ChatItem from "./ChatItem";
 import moment from "moment";
@@ -9,7 +9,7 @@ import { Link } from "react-router-dom";
 
 export default function ChatItems() {
   const { user: loggedInUser } = useAppSelector((state) => state.auth) || {};
-  const { isLoading, data, isError, error } = useGetConversationQuery(
+  const { isLoading, data, isError, error } = useGetConversationsQuery(
     loggedInUser?.email as string
   );
 
