@@ -4,7 +4,7 @@ export interface IMessagesObj {
   id: number;
   conversationId: number;
   sender: IUserObjectInConversation;
-  reciver: IUserObjectInConversation;
+  receiver: IUserObjectInConversation;
   message: string;
   timestamp: number;
 }

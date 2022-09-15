@@ -8,10 +8,11 @@ export interface IChatHeadProps {
 export default function ChatHead({ message }: IChatHeadProps) {
   const { user } = useAppSelector((state) => state.auth);
   const { email: userEmail } = user || {};
+  const { sender, receiver } = message;
+  const partnerEmail = sender.email === userEmail ? receiver : sender;
 
-  const { sender, reciver } = message;
-  const partnerEmail = sender.email === userEmail ? reciver : sender;
   const avatar = gravatarUrl(partnerEmail.email, { size: 80 });
+
   return (
     <div className="relative flex items-center p-3 border-b border-gray-300">
       <img
