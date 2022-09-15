@@ -11,7 +11,7 @@ export default function Register() {
   const [confirmPassword, setConfrimPassword] = useState("");
   const [agree, setagree] = useState(false);
   const [error, setError] = useState("");
-  const [register, { data, isLoading, isError, error: responseError }] =
+  const [register, { data, isLoading, error: responseError }] =
     useRegisterMutation();
   const navigate = useNavigate();
 
@@ -170,6 +170,7 @@ export default function Register() {
               <button
                 type="submit"
                 className="relative flex justify-center w-full px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md group bg-violet-600 hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500"
+                disabled={isLoading}
               >
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3"></span>
                 Sign up

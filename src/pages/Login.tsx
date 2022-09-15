@@ -9,7 +9,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const [login, { data, error: responseError, isError }] = useLoginMutation();
+  const [login, { data, error: responseError, isLoading }] = useLoginMutation();
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.SyntheticEvent) => {
@@ -109,6 +109,7 @@ export default function Login() {
               <button
                 type="submit"
                 className="relative flex justify-center w-full px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md group bg-violet-600 hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500"
+                disabled={isLoading}
               >
                 Sign in
               </button>
