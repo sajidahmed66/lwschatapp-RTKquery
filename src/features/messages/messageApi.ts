@@ -1,7 +1,7 @@
 import { apiSlice } from "../api/apiSlice";
 import { IUserObjectInConversation } from "../conversations/conversationApi";
 export interface IMessagesObj {
-  id: number;
+  id?: number;
   conversationId: number;
   sender: IUserObjectInConversation;
   receiver: IUserObjectInConversation;

@@ -1,4 +1,5 @@
 import { apiSlice } from "../api/apiSlice";
+import messageApi from "../messages/messageApi";
 
 export interface IUserObjectInConversation {
   email: string;
@@ -28,18 +29,64 @@ const conversationApi = apiSlice.injectEndpoints({
       }),
     }),
     addConversation: builder.mutation({
-      query: (data) => ({
+      query: ({ sender, data }) => ({
         url: `/conversations`,
         method: "POST",
         body: data,
       }),
+      onQueryStarted: async (arg, { queryFulfilled, dispatch }) => {
+        const conversation = await queryFulfilled;
+        if (conversation.data?.id) {
+          //silent entry in message table
+          // console.log(conversation);
+          const users = arg.data?.users;
+          const senderUser = users.find(
+            (user: IUserObjectInConversation) => user.email === arg.sender
+          );
+          const recipientUser = users.find(
+            (user: IUserObjectInConversation) => user.email !== arg.sender
+          );
+          dispatch(
+            messageApi.endpoints.addMessage.initiate({
+              conversationId: conversation.data.id,
+              sender: senderUser,
+              receiver: recipientUser,
+              message: arg.data?.message,
+              timestamp: arg.data?.timestamp,
+            })
+          );
+        }
+      },
     }),
     editConversation: builder.mutation({
-      query: ({ id, data }) => ({
+      query: ({ id, sender, data }) => ({
         url: `/conversations/${id}`,
         method: "PATCH",
         body: data,
       }),
+      onQueryStarted: async (arg, { queryFulfilled, dispatch }) => {
+        const conversation = await queryFulfilled;
+        if (conversation.data?.id) {
+          //silent entry in message table
+          // console.log(conversation);
+          const users = arg.data?.users;
+          const senderUser = users.find(
+            (user: IUserObjectInConversation) => user.email === arg.sender
+          );
+          const recipientUser = users.find(
+            (user: IUserObjectInConversation) => user.email !== arg.sender
+          );
+          dispatch(
+            messageApi.endpoints.addMessage.initiate({
+              conversationId: conversation.data.id,
+              sender: senderUser,
+              receiver: recipientUser,
+              message: arg.data?.message,
+              timestamp: arg.data?.timestamp,
+            })
+          );
+        }
+      },
     }),
   }),
 });

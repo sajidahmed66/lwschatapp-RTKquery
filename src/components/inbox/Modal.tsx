@@ -86,22 +86,9 @@ const Modal = ({ open, control }: IModalProps) => {
 
     if (conversation && conversation?.length > 0) {
       //editConversation
-      console.log("from submitted", {
-        id: conversation[0].id,
-        data: {
-          participants: `${myEmail}-${
-            participant && participant?.length > 0 && participant[0].email
-          }`,
-          users: [
-            loggedInUser,
-            participant && participant?.length > 0 && participant[0],
-          ],
-          message,
-          timestamp: new Date().getTime(),
-        },
-      });
       editConversation({
         id: conversation[0].id,
+        sender: myEmail,
         data: {
           participants: `${myEmail}-${
             participant && participant?.length > 0 && participant[0].email
@@ -117,15 +104,18 @@ const Modal = ({ open, control }: IModalProps) => {
     } else if (conversation?.length === 0) {
       //addConversation
       addConversation({
-        participants: `${myEmail}-${
-          participant && participant?.length > 0 && participant[0].email
-        }`,
-        users: [
-          loggedInUser,
-          participant && participant?.length > 0 && participant[0],
-        ],
-        message,
-        timestamp: new Date().getTime(),
+        sender: myEmail,
+        data: {
+          participants: `${myEmail}-${
+            participant && participant?.length > 0 && participant[0].email
+          }`,
+          users: [
+            loggedInUser,
+            participant && participant?.length > 0 && participant[0],
+          ],
+          message,
+          timestamp: new Date().getTime(),
+        },
       });
     }
   };
