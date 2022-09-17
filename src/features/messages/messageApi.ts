@@ -27,3 +27,5 @@ const messageApi = apiSlice.injectEndpoints({
 });
 
 export const { useGetMessagesQuery, useAddMessageMutation } = messageApi;
+
+export default messageApi;

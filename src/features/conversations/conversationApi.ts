@@ -19,7 +19,10 @@ const conversationApi = apiSlice.injectEndpoints({
         url: `/conversations?participants_like=${email}&_sort=timestamp&_order=desc&_page=1&_limit=${process.env.REACT_APP_CONVERSATION_PER_PAGE}`,
       }),
     }),
-    getConversation: builder.query({
+    getConversation: builder.query<
+      IConversation[],
+      { userEmail: string; participantEmail: string }
+    >({
       query: ({ userEmail, participantEmail }) => ({
         url: `/conversations?participants_like=${userEmail}-${participantEmail}&&participants_like=${participantEmail}-${userEmail}`,
       }),
@@ -34,7 +37,7 @@ const conversationApi = apiSlice.injectEndpoints({
     editConversation: builder.mutation({
       query: ({ id, data }) => ({
         url: `/conversations/${id}`,
-        method: "POST",
+        method: "PATCH",
         body: data,
       }),
     }),
@@ -47,3 +50,5 @@ export const {
   useAddConversationMutation,
   useEditConversationMutation,
 } = conversationApi;
+
+export default conversationApi;
