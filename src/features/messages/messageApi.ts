@@ -11,7 +11,7 @@ export interface IMessagesObj {
 
 const messageApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getMessages: builder.query<IMessagesObj[], number>({
+    getMessages: builder.query<IMessagesObj[], number | string>({
       query: (id) => ({
         url: `/messages?conversationId_like=${id}&_sort=timestamp&_order=desc&_page=1&_limit=${process.env.REACT_APP_MESSAGES_PER_PAGE}`,
       }),

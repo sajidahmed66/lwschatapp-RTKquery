@@ -1,5 +1,5 @@
 import { apiSlice } from "../api/apiSlice";
-import messageApi from "../messages/messageApi";
+import messageApi, { IMessagesObj } from "../messages/messageApi";
 
 export interface IUserObjectInConversation {
   email: string;
@@ -65,26 +65,56 @@ const conversationApi = apiSlice.injectEndpoints({
         body: data,
       }),
       onQueryStarted: async (arg, { queryFulfilled, dispatch }) => {
-        const conversation = await queryFulfilled;
-        if (conversation.data?.id) {
-          //silent entry in message table
-          // console.log(conversation);
-          const users = arg.data?.users;
-          const senderUser = users.find(
-            (user: IUserObjectInConversation) => user.email === arg.sender
-          );
-          const recipientUser = users.find(
-            (user: IUserObjectInConversation) => user.email !== arg.sender
-          );
-          dispatch(
-            messageApi.endpoints.addMessage.initiate({
-              conversationId: conversation.data.id,
-              sender: senderUser,
-              receiver: recipientUser,
-              message: arg.data?.message,
-              timestamp: arg.data?.timestamp,
-            })
-          );
+        //optimistic cache update start
+        const patchResult = dispatch(
+          conversationApi.util.updateQueryData(
+            "getConversations",
+            arg.sender,
+            (draft) => {
+              const draftConversation = draft.find((c) => c.id == arg.id);
+              if (draftConversation) {
+                draftConversation.message = arg.data.message;
+                draftConversation.timestamp = arg.data.timestamp;
+              }
+            }
+          )
+        );
+        //optimistic cache update end
+
+        try {
+          const conversation = await queryFulfilled;
+          if (conversation.data?.id) {
+            //silent entry in message table
+            const users = arg.data?.users;
+            const senderUser = users.find(
+              (user: IUserObjectInConversation) => user.email === arg.sender
+            );
+            const recipientUser = users.find(
+              (user: IUserObjectInConversation) => user.email !== arg.sender
+            );
+            const res: IMessagesObj = await dispatch(
+              messageApi.endpoints.addMessage.initiate({
+                conversationId: conversation.data.id,
+                sender: senderUser,
+                receiver: recipientUser,
+                message: arg.data?.message,
+                timestamp: arg.data?.timestamp,
+              })
+            ).unwrap();
+            // update messages cache pessimistically start
+            dispatch(
+              messageApi.util.updateQueryData(
+                "getMessages",
+                res.conversationId,
+                (draft) => {
+                  draft.push(res);
+                }
+              )
+            );
+            // update messages cache pessimistically end
+          }
+        } catch (error) {
+          patchResult.undo();
         }
       },
     }),
