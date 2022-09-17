@@ -36,7 +36,7 @@ export default function ChatBody() {
       <>
         <ChatHead message={data[0]} />
         <Messages messages={data as IMessagesObj[]} />
-        <Options />
+        <Options info={data[0]} />
       </>
     );
   }
