@@ -52,13 +52,11 @@ const conversationApi = apiSlice.injectEndpoints({
               const conversation = draft.data.find(
                 (conversation) => conversation.id === data?.data?.id
               );
-
               if (conversation?.id) {
                 conversation.message = data.data?.message;
                 conversation.timestamp = data.data?.timestamp;
               } else {
-                // part of the task
-                // draft.push(data.data);
+                draft.data.unshift(data.data);
               }
             });
           });
