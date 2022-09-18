@@ -1,6 +1,6 @@
 import { apiSlice } from "../api/apiSlice";
 import messageApi, { IMessagesObj } from "../messages/messageApi";
-
+import io from "socket.io-client";
 export interface IUserObjectInConversation {
   email: string;
   name: string;
@@ -19,6 +19,43 @@ const conversationApi = apiSlice.injectEndpoints({
       query: (email) => ({
         url: `/conversations?participants_like=${email}&_sort=timestamp&_order=desc&_page=1&_limit=${process.env.REACT_APP_CONVERSATION_PER_PAGE}`,
       }),
+      onCacheEntryAdded: async (
+        arg,
+        { updateCachedData, cacheDataLoaded, cacheEntryRemoved }
+      ) => {
+        //create socket
+        const socket = io("http://localhost:9000", {
+          reconnection: true,
+          reconnectionDelay: 1000,
+          reconnectionAttempts: 10,
+          transports: ["websocket"],
+          agent: false,
+          upgrade: false,
+          rejectUnauthorized: false,
+        });
+
+        try {
+          await cacheDataLoaded;
+          socket.on("conversation", (data) => {
+            console.log(data);
+            updateCachedData((draft) => {
+              const conversation = draft.find(
+                (conversation) => conversation.id === data?.data?.id
+              );
+
+              if (conversation?.id) {
+                conversation.message = data.data?.message;
+                conversation.timestamp = data.data?.timestamp;
+              } else {
+                // part of the task
+                // draft.push(data.data);
+              }
+            });
+          });
+        } catch (error) {}
+        await cacheEntryRemoved;
+        socket.close();
+      },
     }),
     getConversation: builder.query<
       IConversation[],
