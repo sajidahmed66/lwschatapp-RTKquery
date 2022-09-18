@@ -15,10 +15,20 @@ export interface IConversation {
 }
 const conversationApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getConversations: builder.query<IConversation[], string>({
+    getConversations: builder.query<
+      { data: IConversation[]; totalCount: number },
+      string
+    >({
       query: (email) => ({
         url: `/conversations?participants_like=${email}&_sort=timestamp&_order=desc&_page=1&_limit=${process.env.REACT_APP_CONVERSATION_PER_PAGE}`,
       }),
+      transformResponse: (apiresponse, meta) => {
+        const totalCount = meta?.response?.headers.get("X-Total-Count");
+        return {
+          data: apiresponse as IConversation[],
+          totalCount: Number(totalCount),
+        };
+      },
       onCacheEntryAdded: async (
         arg,
         { updateCachedData, cacheDataLoaded, cacheEntryRemoved }
@@ -39,7 +49,7 @@ const conversationApi = apiSlice.injectEndpoints({
           socket.on("conversation", (data) => {
             console.log(data);
             updateCachedData((draft) => {
-              const conversation = draft.find(
+              const conversation = draft.data.find(
                 (conversation) => conversation.id === data?.data?.id
               );
 
@@ -55,6 +65,31 @@ const conversationApi = apiSlice.injectEndpoints({
         } catch (error) {}
         await cacheEntryRemoved;
         socket.close();
+      },
+    }),
+    getUpdatedQueryConversations: builder.query<
+      IConversation[],
+      { email: string; page: number }
+    >({
+      query: ({ email, page }) => ({
+        url: `/conversations?participants_like=${email}&_sort=timestamp&_order=desc&_page=${page}&_limit=${process.env.REACT_APP_CONVERSATION_PER_PAGE}`,
+      }),
+      onQueryStarted: async ({ email, page }, { queryFulfilled, dispatch }) => {
+        try {
+          const conversations = await queryFulfilled;
+          if (conversations?.data.length) {
+            //update conversations cache data pasimistically
+            dispatch(
+              conversationApi.util.updateQueryData(
+                "getConversations",
+                email,
+                (draft) => {
+                  draft.data = [...draft.data, ...conversations.data];
+                }
+              )
+            );
+          }
+        } catch (error) {}
       },
     }),
     getConversation: builder.query<
@@ -108,7 +143,7 @@ const conversationApi = apiSlice.injectEndpoints({
             "getConversations",
             arg.sender,
             (draft) => {
-              const draftConversation = draft.find((c) => c.id == arg.id);
+              const draftConversation = draft.data.find((c) => c.id == arg.id);
               if (draftConversation) {
                 draftConversation.message = arg.data.message;
                 draftConversation.timestamp = arg.data.timestamp;
