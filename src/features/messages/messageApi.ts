@@ -12,15 +12,25 @@ export interface IMessagesObj {
 
 const messageApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getMessages: builder.query<IMessagesObj[], number | string>({
+    getMessages: builder.query<
+      { data: IMessagesObj[]; totalCount: number },
+      number
+    >({
       query: (id) => ({
         url: `/messages?conversationId_like=${id}&_sort=timestamp&_order=desc&_page=1&_limit=${process.env.REACT_APP_MESSAGES_PER_PAGE}`,
       }),
+      transformResponse: (apiresponse, meta) => {
+        const totalCount = meta?.response?.headers.get("X-Total-Count");
+        return {
+          data: apiresponse as IMessagesObj[],
+          totalCount: Number(totalCount),
+        };
+      },
       onCacheEntryAdded: async (
         arg,
         { updateCachedData, cacheDataLoaded, cacheEntryRemoved }
       ) => {
-        const socket = io("http://localhost:9000", {
+        const socket = io("https://lws-chat-app66.herokuapp.com", {
           reconnection: true,
           reconnectionDelay: 1000,
           reconnectionAttempts: 10,
@@ -35,9 +45,36 @@ const messageApi = apiSlice.injectEndpoints({
           await cacheDataLoaded;
           socket.on("messages", (data) => {
             updateCachedData((draft) => {
-              draft.unshift(data.data);
+              draft.data.unshift(data.data);
             });
           });
+        } catch (error) {
+          await cacheEntryRemoved;
+          socket.close();
+        }
+      },
+    }),
+    getMoreMessages: builder.query<
+      IMessagesObj[],
+      { id: number; page: number }
+    >({
+      query: ({ id, page }) => ({
+        url: `/messages?conversationId_like=${id}&_sort=timestamp&_order=desc&_page=${page}&_limit=${process.env.REACT_APP_MESSAGES_PER_PAGE}`,
+      }),
+      onQueryStarted: async (args, { queryFulfilled, dispatch }) => {
+        try {
+          const updatedMessages = await queryFulfilled;
+          if (updatedMessages.data.length > 0) {
+            dispatch(
+              messageApi.util.updateQueryData(
+                "getMessages",
+                args.id,
+                (draft) => {
+                  draft.data = [...draft.data, ...updatedMessages.data];
+                }
+              )
+            );
+          }
         } catch (error) {}
       },
     }),

@@ -29,14 +29,22 @@ export default function ChatBody() {
       }
     }
     content = <Error message={errorMessage} />;
-  } else if (!isLoading && !isError && data?.length === 0) {
+  } else if (!isLoading && !isError && data?.data.length === 0) {
     content = <div>no messages found</div>;
-  } else if (!isLoading && !isError && data && (data?.length as number) > 0) {
+  } else if (
+    !isLoading &&
+    !isError &&
+    data &&
+    (data?.data.length as number) > 0
+  ) {
     content = (
       <>
-        <ChatHead message={data[0]} />
-        <Messages messages={data as IMessagesObj[]} />
-        <Options info={data[0]} />
+        <ChatHead message={data.data[0]} />
+        <Messages
+          messages={data.data as IMessagesObj[]}
+          totalCount={data.totalCount}
+        />
+        <Options info={data.data[0]} />
       </>
     );
   }

@@ -34,7 +34,7 @@ const conversationApi = apiSlice.injectEndpoints({
         { updateCachedData, cacheDataLoaded, cacheEntryRemoved }
       ) => {
         //create socket
-        const socket = io("http://localhost:9000", {
+        const socket = io("https://lws-chat-app66.herokuapp.com", {
           reconnection: true,
           reconnectionDelay: 1000,
           reconnectionAttempts: 10,
@@ -176,13 +176,13 @@ const conversationApi = apiSlice.injectEndpoints({
                 "getMessages",
                 res.conversationId,
                 (draft) => {
-                  const messages = draft.filter(
+                  const messages = draft.data.filter(
                     (message) => message.id === res.id
                   );
                   if (messages.length > 0) {
                     return draft;
                   } else if (messages.length === 0) {
-                    draft.push(res);
+                    draft.data.push(res);
                   }
                 }
               )
