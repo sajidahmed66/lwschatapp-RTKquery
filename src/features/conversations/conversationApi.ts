@@ -47,7 +47,6 @@ const conversationApi = apiSlice.injectEndpoints({
         try {
           await cacheDataLoaded;
           socket.on("conversation", (data) => {
-            console.log(data);
             updateCachedData((draft) => {
               const conversation = draft.data.find(
                 (conversation) => conversation.id === data?.data?.id
@@ -177,7 +176,14 @@ const conversationApi = apiSlice.injectEndpoints({
                 "getMessages",
                 res.conversationId,
                 (draft) => {
-                  draft.push(res);
+                  const messages = draft.filter(
+                    (message) => message.id === res.id
+                  );
+                  if (messages.length > 0) {
+                    return draft;
+                  } else if (messages.length === 0) {
+                    draft.push(res);
+                  }
                 }
               )
             );
