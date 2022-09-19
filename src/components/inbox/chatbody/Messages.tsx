@@ -56,8 +56,8 @@ export default function Messages({ messages, totalCount }: IMessageProps) {
           next={fetchMore}
           hasMore={hasMore}
           loader={<h4>Loading...</h4>}
-          height={window.innerHeight - 267}
-          className="flex flex-col-reverse pb-2"
+          height={window.innerHeight - 300}
+          className="flex flex-col-reverse px-6 pb-2"
         >
           {messages
             .slice()
